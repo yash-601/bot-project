@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "856498453858",
+    "project_id": "ebot-46ad9",
+    "storage_bucket": "ebot-46ad9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:856498453858:android:120b1700cbeed50d9fc03b",
+        "android_client_info": {
+          "package_name": "com.example.bot"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "856498453858-vm9s1h5hrhjnivfs2eccudmr2sipfmvo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA4XsuaR2jUF6EsiZZGYsBskericeDkoP0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "856498453858-95l5f7al70bqe0e3io7edf72skj8oq0m.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "856498453858-ttl3e0rf5kbkboj6vskjtndfpu2qc6og.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.bot"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
