@@ -40,6 +40,7 @@ class Form extends StatefulWidget {
 
 class _FormState extends State<Form> {
 
+  final TextEditingController _name = TextEditingController();
   final TextEditingController _email = TextEditingController();
   final TextEditingController _pass = TextEditingController();
   bool emailValidator = false;
@@ -74,7 +75,6 @@ class _FormState extends State<Form> {
                 contentPadding: const EdgeInsets.fromLTRB(5.0, 0.0, 0.0, 0.0),
                 labelText: 'Email',
                 errorText: emailValidator ?'Value can\'t be empty!' : null,
-
               ),
             ),
             const SizedBox(height: 15.0),
@@ -117,12 +117,13 @@ class _FormState extends State<Form> {
                       goToNextScreen = false;
                     }
                     if (goToNextScreen) {
-                      _email.text = "";
-                      _pass.text = "";
+                      String mail = _email.text;
                       Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => Home())
+                          MaterialPageRoute(builder: (context) => Home(name: '', email: mail))
                       );
+                      _email.text = "";
+                      _pass.text = "";
                     }
                   },
                 style: ButtonStyle(

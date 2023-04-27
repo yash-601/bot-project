@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'home.dart';
+import 'firestore.dart';
 
 
 class Register extends StatelessWidget {
@@ -20,7 +21,7 @@ class Register extends StatelessWidget {
           ),
           backgroundColor: Colors.deepPurpleAccent,
         ),
-        resizeToAvoidBottomInset : false,
+        resizeToAvoidBottomInset : true,
         body: const Page(),
     ));
   }
@@ -34,6 +35,7 @@ class Page extends StatefulWidget {
 }
 
 class _PageState extends State<Page> {
+  final TextEditingController _name = TextEditingController();
   final TextEditingController _email = TextEditingController();
   final TextEditingController _pass = TextEditingController();
 
@@ -43,7 +45,7 @@ class _PageState extends State<Page> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(40.0, 50.0, 40.0, 170.0),
+      padding: const EdgeInsets.fromLTRB(40.0, 50.0, 40.0, 120.0),
       child: Container(
         decoration: const BoxDecoration(
           borderRadius: BorderRadius.all(Radius.circular(30.0)),
@@ -52,6 +54,14 @@ class _PageState extends State<Page> {
           mainAxisAlignment: MainAxisAlignment.end,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            TextField(
+                controller: _name,
+                decoration: const InputDecoration(
+                  contentPadding: EdgeInsets.fromLTRB(5.0, 0.0, 0.0, 0.0),
+                  labelText: 'Username',
+                )
+            ),
+            const SizedBox(height: 15.0),
             TextField(
               controller: _email,
               decoration: InputDecoration(
@@ -63,6 +73,7 @@ class _PageState extends State<Page> {
             const SizedBox(height: 15.0),
             TextField(
               controller: _pass,
+              obscureText: true,
               decoration: InputDecoration(
                 contentPadding: const EdgeInsets.fromLTRB(5.0, 0.0, 0.0, 0.0),
                 labelText: 'password',
@@ -99,12 +110,15 @@ class _PageState extends State<Page> {
                     }
                   }
                   if (_email.text.isNotEmpty) {
-                    _email.text = "";
-                    _pass.text = "";
+                    addUser(_email.text, _pass.text);
+                    String mail = _email.text;
+                    String uname = _name.text;
                     Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => Home())
+                        MaterialPageRoute(builder: (context) => Home(name: uname ,email: mail))
                     );
+                    _email.text = "";
+                    _pass.text = "";
                   }
                 },
                 style: ButtonStyle(

@@ -1,8 +1,18 @@
-import 'package:flutter/material.dart';
 
+import 'package:dialog_flowtter/dialog_flowtter.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:http/http.dart' as http;
+import 'profile.dart';
+import 'api.dart';
+import 'dart:convert';
+import 'db_ops/db.dart';
 
 class Home extends StatefulWidget {
-  Home({Key? key}) : super(key: key);
+  final String email;
+  final String name;
+  Home({Key? key, required this.name, required this.email}) : super(key: key);
 
   @override
   State<Home> createState() => _HomeState();
@@ -10,11 +20,20 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
 
+  int msgNo = 1;
   List messages = [];
   final TextEditingController _input = TextEditingController();
 
+  // adding this to initialize dialogflowter
+  late DialogFlowtter dialogFlowtter;
+  @override
+  void initState() {
+    DialogFlowtter.fromFile().then((instance) => dialogFlowtter = instance);
+    super.initState();
+  }
 
-  void addMsgToList(String message) {
+
+  void addMsgToList(List message) {
     setState(() {
       messages.add(message);
     });
@@ -52,7 +71,12 @@ class _HomeState extends State<Home> {
                 ];
               },
               onSelected: (value) {
-                if (value == 2) {
+                if (value == 0) {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => Profile(user: widget.name, mail: widget.email))
+                  );
+                }
+                else if (value == 2) {
                   Navigator.pop(context);
                 }
               }
@@ -75,23 +99,30 @@ class _HomeState extends State<Home> {
                     child: ListView.builder(
                       itemCount: messages.length,
                       itemBuilder: (BuildContext context, int index) {
+                        msgNo++;
                         return Padding(
-                          padding: const EdgeInsets.fromLTRB(10.0, 10.0, 8.0, 0.0),
+                          padding: const EdgeInsets.fromLTRB(10.0, 10.0, 8.0, 0.0)  ,
                           child: Container(
-                            margin: const EdgeInsets.fromLTRB(60.0, 0.0, 5.0, 0.0),
+                            margin: messages[index][1] ? const EdgeInsets.fromLTRB(100.0, 0.0, 5.0, 0.0) : const EdgeInsets.fromLTRB(5.0, 0.0, 100.0, 0.0),
                             decoration: BoxDecoration(
                               color: Colors.grey[900],
                               borderRadius: BorderRadius.circular(15.0),
                             ),
                             child: Padding(
                               padding: const EdgeInsets.fromLTRB(15.0, 10.0, 8.0, 10.0),
-                              child: Text(
-                                '${messages[index]}',
+                              child: messages[index][1] ? Text(
+                                '${messages[index][0]}',
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 20.0
+                                )
+                              ) : Linkify(
+                                text: '${messages[index][0]}',
+                                style: const TextStyle(
+                                  fontSize: 18.0,
                                 ),
-                              ),
+                                onOpen: _onOpen,
+                              )
                             ),
                           ),
                         );
@@ -117,7 +148,7 @@ class _HomeState extends State<Home> {
                               cursorColor: Colors.white,
                               keyboardType: TextInputType.multiline,
                               style: const TextStyle(
-                                fontSize: 20.0,
+                                fontSize: 18.0,
                                 color: Colors.white
                               ),
                               decoration: const InputDecoration(
@@ -127,12 +158,46 @@ class _HomeState extends State<Home> {
                           ),
                         ),
                         ElevatedButton(
-                          onPressed: () {
+                          onPressed: () async {
                             String msg = _input.text;
+                            // send query to python api here
+                            Uri url = Uri.parse("http://10.0.2.2:5000/api?Query=$msg");
                             setState(() {
                               _input.text = "";
                             });
-                            addMsgToList(msg);
+                            addMsgToList([msg, true]);
+
+                            msg = msg.toLowerCase();
+                            if (msg.contains('hii') || msg.contains('hey') || msg.contains('hello')
+                                || msg.contains('bye') || msg.contains('see you') || msg.contains('thanks')
+                            ) {
+                              // response from the dialogflow
+                              DetectIntentResponse response = await dialogFlowtter.detectIntent(
+                                  queryInput: QueryInput(text: TextInput(text: msg)));
+                              if (response.message != null) {
+                                addMsgToList([response.message!.text!.text![0], false]);
+                              }
+                            }
+                            else {
+                              // retrieving data from python api
+                              var data = await getData(url);
+                              var decodedData = jsonDecode(data);
+                              Map<String, dynamic> link = decodedData;
+                              List links = [];
+                              link.forEach((key, value) => links.add(value));
+                              String combined = "";
+                              for (int i=0; i<links.length; i++) {
+                                combined += links[i];
+                                if (i < links.length - 1) {
+                                  combined += "\n\n";
+                                }
+                              }
+
+                              addMsgToList([combined, false]);
+
+                              // adding user visited links to database
+                              // addUser(widget.email, links);
+                            }
                           },
                           style: ButtonStyle(
                             backgroundColor: MaterialStateProperty.all(Colors.transparent),
@@ -156,5 +221,16 @@ class _HomeState extends State<Home> {
         ),
       )
     );
+  }
+}
+
+
+Future<void> _onOpen (LinkableElement link) async {
+  List links = link.url.split("\n\n");
+  for (int i=0; i<links.length; i++) {
+    Uri u = Uri.parse(links[i]);
+    // if (await canLaunchUrl(u)) {
+      await launchUrl(u);
+    // }
   }
 }
