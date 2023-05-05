@@ -1,5 +1,6 @@
 
 import 'package:dialog_flowtter/dialog_flowtter.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -70,14 +71,14 @@ class _HomeState extends State<Home> {
                   ),
                 ];
               },
-              onSelected: (value) {
+              onSelected: (value) async {
                 if (value == 0) {
                   Navigator.push(context,
                       MaterialPageRoute(builder: (context) => Profile(user: widget.name, mail: widget.email))
                   );
                 }
                 else if (value == 2) {
-                  Navigator.pop(context);
+                  await FirebaseAuth.instance.signOut();
                 }
               }
             )
@@ -160,8 +161,8 @@ class _HomeState extends State<Home> {
                         ElevatedButton(
                           onPressed: () async {
                             String msg = _input.text;
-                            // send query to python api here
-                            Uri url = Uri.parse("http://10.0.2.2:5000/api?Query=$msg");
+                            // send query to python api here -> http://10.0.2.2:5000
+                            Uri url = Uri.parse("https://bot-web-service.onrender.com/api?Query=$msg");
                             setState(() {
                               _input.text = "";
                             });
@@ -196,7 +197,7 @@ class _HomeState extends State<Home> {
                               addMsgToList([combined, false]);
 
                               // adding user visited links to database
-                              // addUser(widget.email, links);
+                              addUser(widget.email, links);
                             }
                           },
                           style: ButtonStyle(

@@ -8,7 +8,19 @@ import 'home.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(const Login());
+
+  FirebaseAuth.instance
+  .authStateChanges()
+  .listen((User? user)
+  {
+    if (user == null) {
+      runApp(const Login());
+    }
+    else {
+      runApp(MaterialApp(home: Home(name: "", email: "")));
+    }
+  }
+  );
 }
 
 class Login extends StatelessWidget {

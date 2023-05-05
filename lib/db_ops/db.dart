@@ -16,10 +16,6 @@ String getId () {
 }
 
 void addUser(String email, List links) async{
-  String id = getId();
-  await ref.set({
-    "$id/email": "mail@ml.com",
-    "$id/links_visited" : links
-  });
+
 }
 
