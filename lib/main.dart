@@ -1,3 +1,4 @@
+import 'package:bot/shared/load.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -17,7 +18,7 @@ void main() async {
       runApp(const Login());
     }
     else {
-      runApp(MaterialApp(home: Home(name: "", email: "")));
+      runApp(MaterialApp(home: Home(id: user.uid,)));
     }
   }
   );
@@ -57,6 +58,7 @@ class _FormState extends State<Form> {
   final TextEditingController _pass = TextEditingController();
   bool emailValidator = false;
   bool passValidator = false;
+  bool loading = false;
 
   @override
   void dispose() {
@@ -70,7 +72,7 @@ class _FormState extends State<Form> {
 
     bool goToNextScreen = true;
 
-    return Padding(
+    return loading? const Loading(): Padding(
       padding: const EdgeInsets.fromLTRB(40.0, 50.0, 40.0, 170.0),
       child: Container(
         decoration: const BoxDecoration(
@@ -106,13 +108,22 @@ class _FormState extends State<Form> {
                   setState(() {
                     _email.text.isEmpty ? emailValidator = true : emailValidator = false;
                     _pass.text.isEmpty ? passValidator = true : passValidator = false;
+                    setState(() {
+                      loading = true;
+                    });
                   });
+                  UserCredential? userCreds;
+                  String? userId;
                   try {
-                    UserCredential userCreds = await FirebaseAuth.instance.signInWithEmailAndPassword(
+                    userCreds = await FirebaseAuth.instance.signInWithEmailAndPassword(
                         email: _email.text,
                         password: _pass.text,
                     );
+                    userId = userCreds.user?.uid;
                   } on FirebaseAuthException catch(e) {
+                      setState(() {
+                        loading = false;
+                      });
                       if (e.code == 'user-not-found') {
                         const snackBar = SnackBar(
                           content: Text('User not Found!!'),
@@ -132,7 +143,7 @@ class _FormState extends State<Form> {
                       String mail = _email.text;
                       Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => Home(name: '', email: mail))
+                          MaterialPageRoute(builder: (context) => Home(id: userId!,))
                       );
                       _email.text = "";
                       _pass.text = "";

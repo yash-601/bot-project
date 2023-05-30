@@ -1,3 +1,6 @@
+import 'dart:ui';
+
+import 'package:bot/db_ops/db.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'home.dart';
@@ -85,6 +88,7 @@ class _PageState extends State<Page> {
               height: 45.0,
               child: ElevatedButton(
                 onPressed: () async {
+                  String? uid;
                   setState(() {
                     _email.text.isEmpty ? emailValidator = true : emailValidator = false;
                     _pass.text.isEmpty ? passValidator = true : passValidator = false;
@@ -94,6 +98,7 @@ class _PageState extends State<Page> {
                       email: _email.text,
                       password: _pass.text,
                     );
+                    uid = userCreds.user?.uid;
                   } on FirebaseAuthException catch(e) {
                     if (e.code == 'weak-password') {
                       const snackBar = SnackBar(
@@ -110,12 +115,13 @@ class _PageState extends State<Page> {
                     }
                   }
                   if (_email.text.isNotEmpty) {
-                    addUser(_email.text, _pass.text);
+                    Database db = Database(uid: uid!);
+                    db.addUser({'name': _name.text, 'mail': _email.text});
                     String mail = _email.text;
                     String uname = _name.text;
                     Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => Home(name: uname ,email: mail))
+                        MaterialPageRoute(builder: (context) => Home(id: uid!,))
                     );
                     _email.text = "";
                     _pass.text = "";

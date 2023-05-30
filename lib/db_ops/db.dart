@@ -1,21 +1,33 @@
 
+import 'dart:ui';
+import 'package:flutter/material.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
 
-DatabaseReference ref = FirebaseDatabase.instance.ref("user_profile");
 
-String getId () {
-  String id = "";
-  FirebaseFirestore.instance.collection("myCollection").doc("myDoc").get().then((docSnapshot) {
-    if (docSnapshot.exists) {
-      id = docSnapshot.id;
-    }
-  });
-  return id;
-}
+class Database {
 
-void addUser(String email, List links) async{
+  final String uid;
+  Database({ required this.uid });
+
+  dynamic db = FirebaseFirestore.instance;
+
+  Future addUser(Map<String, dynamic> data) async {
+    final user = data;
+    db
+        .collection("users")
+        .doc(uid)
+        .set(user);
+  }
+
+  Future updateUser(Map<String, dynamic> data) async {
+    final user = data;
+    db
+        .collection("users")
+        .doc(uid)
+        .update(user);
+  }
 
 }
 

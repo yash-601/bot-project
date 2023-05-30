@@ -11,9 +11,8 @@ import 'dart:convert';
 import 'db_ops/db.dart';
 
 class Home extends StatefulWidget {
-  final String email;
-  final String name;
-  Home({Key? key, required this.name, required this.email}) : super(key: key);
+  final String id;
+  Home({Key? key, required this.id}) : super(key: key);
 
   @override
   State<Home> createState() => _HomeState();
@@ -74,7 +73,7 @@ class _HomeState extends State<Home> {
               onSelected: (value) async {
                 if (value == 0) {
                   Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => Profile(user: widget.name, mail: widget.email))
+                      MaterialPageRoute(builder: (context) => Profile(id: widget.id))
                   );
                 }
                 else if (value == 2) {
@@ -195,9 +194,6 @@ class _HomeState extends State<Home> {
                               }
 
                               addMsgToList([combined, false]);
-
-                              // adding user visited links to database
-                              addUser(widget.email, links);
                             }
                           },
                           style: ButtonStyle(
